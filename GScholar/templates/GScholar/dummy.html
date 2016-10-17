@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>	
+	{% load staticfiles %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'GScholar/stylefordummy.css' %}" />
+	<!-- <script type="text/javascript" src="{% static 'GScholar/ajaxjquery.js' %}"></script>
+	<script type="text/javascript" src="{% static 'GScholar/cloudflare.js' %}" charset="utf-8"></script> -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+  <!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script> -->
+	<title>{{ person }} - Author Graph</title>
+</head>
+<body>
+  	<div id="div1">
+  		<h2>Author Co-author relationship</h2>
+  		<div id="buttonDiv">
+  			<!-- <button class="navigationButtons" class="top-right">INDICES</button> -->
+  			<button class="navigationButtons" class="top-right" onclick="displayWindow()">HELP</button>
+  		</div>
+  	</div>
+    <!-- <input type="button" id="btnSearch" Value="DISPLAY PAPERS" onclick="doSomething()" style="display: inline" /> -->
+    <form action="{% url 'process' %}" method="post" id="formSubmit">
+    	{% csrf_token %}
+    	<input type="hidden" name="firstname" id="hiddenauthor">
+		<input type="submit" id="btnSearch" value="AS MAIN AUTHOUR" style="display: inline"/>
+	</form>
+	<!-- <input type="button" id="btnSearch" Value="INDICES" onclick="displayIndices()" style="display: inline"/> -->
+	<p id="demo"></p>
+	</br></br>
+	<div id="outerDiv">
+		<div id="containButtons"></div>
+		<div id="contain"></div>
+		<div id="info">
+			<p>MAIN AUTHOR: <span class="toCapitalize">{{ person }}</span></p>
+			<p>H-Index: <span id="hindex"></span></p>
+			<p>G-Index: <span id="gindex"></span></p>
+			<p>Co AUTHOR: <span id="coauthName"></p>
+			<p>Shared Papers: <span id="sharedPaperNo"></p>
+			<p>Shared Citations: <span id="sharedCitNo"></p>
+			<p>Papers: <p id="displayPapers"></p></p>
+		</div>
+	</div>
+	
+	{% load staticfiles %}
+	
+	<script type="text/javascript">
+		var listOfFiles = new Array();
+		cnt=0;
+		{% for file in listOfFiles %}
+			listOfFiles.push("{{ file }}");
+			but=document.createElement("input");
+			but.setAttribute("type","button");
+			but.onclick=function(){generateGraph("{{ file }}");}
+			cnt+=1;
+			but.value=cnt;
+			but.setAttribute("class","navigationButtons")
+			containButtons=document.getElementById("containButtons");
+			containButtons.appendChild(but);
+		{% endfor %}
+		var author,paper,newRamp,newRamp1,newRamp2,min_year,max_year,min_nosp,max_nosp,min_nosc,max_nosc,g_index,h_index,prof,total_cit;
+		generateGraph();
+		function generateGraph(file="{{ filename }}"){
+		
+		var diameter = 960;
+  		//var author,paper,newRamp,newRamp1,newRamp2,min_year,max_year,min_nosp,max_nosp,min_nosc,max_nosc,g_index,h_index,prof,total_cit;
+  		
+		var tree = d3.layout.tree()
+    	.size([360, diameter / 2 - 140])
+    	.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+	
+		var diagonal = d3.svg.diagonal.radial()
+    	.projection(function(d) { return [ d.y , d.x / 180 * Math.PI]; });
+    	container=document.getElementById("contain");
+    	while (container.hasChildNodes()) {
+    		container.removeChild(container.lastChild);
+		}
+
+		var svg = d3.select(container).append("svg")
+    	.attr("width", diameter)
+    	.attr("height", diameter - 70)
+    	.append("g")
+	    .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+	    
+		
+		$.getJSON("\\media\\{{ filename1 }}", function(json) {
+			g_index=json["g_index"];
+			h_index=json["h_index"];
+			min_year=json["min_year"];
+			max_year=json["max_year"];
+			min_nosp=json["min_nosp"];
+			max_nosp=json["max_nosp"];
+			min_nosc=json["min_nosc"];
+			max_nosc=json["max_nosc"];
+			total_cit=json["total_cit"];
+			prof=json["prof"];
+			if (prof==1)
+				document.getElementById("contain").style.backgroundColor='#d1ffc1';
+			else
+				document.getElementById("contain").style.backgroundColor='#ffdddd';	
+			hindex.innerHTML=h_index;
+			gindex.innerHTML=g_index;
+		});
+	
+		
+		d3.json("\\media\\"+file, function(error, root) {
+  					
+			newRamp = d3.scale.linear().domain([min_year, max_year]).range(["blue","red"]);
+			newRamp1 = d3.scale.linear().domain([min_nosp ,max_nosp]).range([1,20]);
+			newRamp2 = d3.scale.linear().domain([min_nosc ,max_nosc]).range([2,20]);
+						
+				
+		  	var nodes = tree.nodes(root),
+		    links = tree.links(nodes);
+			var i=1;
+		   
+			
+			var link = svg.selectAll(".link")       
+		    .data(links)       
+		    .enter().append("path")       
+		    .attr("class","link")
+		    .attr("stroke-width", function(d) { return newRamp1(d.target.edge_thickness); })//mark
+		    .attr("d", diagonal);
+			
+		  	var node = svg.selectAll(".node")
+		    .data(nodes)
+		    .enter().append("g")
+		    .attr("class", "node")
+		    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+
+		    var div = d3.select("body").append("div")	
+    		.attr("class", "tooltip")
+    		.attr("id","displayDiv")				
+    		.style("opacity", 0);
+    		
+    		var div1 = d3.select("body").append("div")	
+    		.attr("class", "tooltip")				
+    		.style("opacity", 0);
+    		
+    		
+
+		    clicked=0;
+			node.append("circle")
+		    .attr("r", function(d) { 
+		    	
+		    	author="{{ person }}".toLowerCase();
+		    	if (d.name == author)
+		    		return 10;
+		    	else
+		    		return newRamp2(d.node_diameter); 
+		    })//mark
+		    .on("click",function(d){
+		    	author="{{ person }}".toLowerCase();
+			    	if(d.name==author){
+			    		sharedCitNo.parentElement.innerHTML="Total Citations: ";
+			    		//sharedCitNo.innerHTML=d.node_diameter;
+			    		sharedPaperNo.parentElement.innerHTML="Total Papers: ";
+				    	//sharedPaperNo.innerHTML=(d.papers).length;
+				    	coauthName.innerHTML="";
+				    	all_paper = d.papers.replace(/;/g, '</br>* ');
+				    	displayPapers.innerHTML="* "+all_paper;
+
+			    	}
+			    	else{
+			    		
+				    	sharedCitNo.innerHTML=d.node_diameter;
+				    	sharedPaperNo.innerHTML=d.edge_thickness;
+				    	coauthName.innerHTML=(d.name).toUpperCase();
+				    	all_paper = d.papers.replace(/;/g, '</br>* ');
+				    	displayPapers.innerHTML="* "+all_paper;
+			    }
+		    })
+			.on("dblclick",function(d){
+				author=d.name;
+				hiddenauthor.value=author;
+				formSubmit.submit();
+			})
+			.on("mouseover",function(d){
+				author="{{ person }}".toLowerCase();
+				if (d.name == author)
+		    		tempString="";
+		    	else
+		    		tempString="Shared Citations: "+d.node_diameter + "</br>"  +"Shared Papers: "+ d.edge_thickness;
+		    	div.html("<strong id='strng'>"+d.name+"</strong></br>"+tempString)
+
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px")
+                .style("opacity", 1);
+                
+			})
+			.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+		    .on("mouseout", function(){
+		    	div.transition()
+		    	.duration(50)
+		    	.style("opacity", 0);
+
+		    })//return tooltip.style("visibility", "hidden");})
+			.style("fill",function(d){
+				if(d.colour=='')
+					return "white"; 
+				else if(d.colour=="green")
+					return "green";
+				else 
+					return newRamp(d.colour);
+			});//mark
+
+		    var tooltip = d3.select("body")
+		                  .append("div")
+		                  .style("color","red")
+		                  .style("border","solid")
+		                  .style("position", "absolute")
+		                  .style("background-color","yellow")
+		                  .style("z-index", "10")
+		                  .style("visibility", "hidden")
+					      .text("")
+				
+
+		  	node.append("text")
+		    .attr("dy", ".31em")
+		    .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+		    .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+		    .text(function(d) { return (d.name).toUpperCase(); });
+		});
+
+		d3.select(self.frameElement).style("height", diameter - 150 + "px");
+		function myFunction() {
+		    //var s="/GScholar/process/"+author;
+		    //window.open(s,"_self");
+		    hiddenauthor.value=author;
+		}
+	}
+	
+		
+		function doSomething() {
+			all_paper = paper.replace(/;/g, '\n');
+			window.alert(all_paper);
+		}
+		function displayWindow(){
+			
+			var myWindow = window.open("", "INSTRUCTIONS", "width=1000,height=1000");
+			myWindow.document.write("<p>The following is a guide to the features:<br>"+	
+					"1. Central node: Main Author </br>"+
+					"2. Surrounding nodes: Co-authors of the main author.</br>"+
+					"3. Edge Thickness: Number of shared papers the co-author shares with the main author.</br>"+
+					"4. Node Diameter: Number of shared citations</br>"+
+					"5. Colour gradient of nodes: Red to Blue represents recent work to oldest , white representing no year "+"information available.</br>"+
+					"6. Background colour of the graph: Green represents author with profile in Google Scholar otherwise red.</br>"+
+				"<br>"+
+				"<br>"+
+				"The following are the functionalities:<br>	"+		
+					"1. Hover over node: first integer - citations , second integer - paper</br>"+
+					"2. Click on a co-author and click on 'Display Papers' to view the titles of papers.</br>"+
+					"3. Click on a co-author and click on 'As main author' to view the selected co-author as the main author. </"+"br>"+
+			"</p>");
+// 			myWindow.document.innerHTML="";
+// 			myWindow.document.write("The following is a guide to the features:"+"<br>"+
+// 	"1. Central node: Main Author"+
+// 	"2. Surrounding nodes: Co-authors of the main author.<br>"+
+// "3. Edge Thickness: Number of shared papers the co-author shares with the main author.<br>"+
+// "4. Node Diameter: Number of shared citations<br>"+
+// "5.Colour gradient of nodes: Red to Blue represents recent work to oldest , white representing no year information available.<br>"+
+// "<br>"+
+// "<br>"+
+// "The following are the functionalities:<br>"+
+// "1. Hover over node: first integer - citations , second integer - paper<br>"+
+// "2. Click on a co-author and click on 'Display Papers' to view the titles of papers.<br>"+
+// "3. Click on a co-author and click on 'As main author' to view the selected co-author as the main author.<br>");
+		}
+	</script>
+	
+</body>
+</html>
