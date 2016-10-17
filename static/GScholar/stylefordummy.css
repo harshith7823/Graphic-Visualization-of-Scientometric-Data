@@ -1,0 +1,161 @@
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node {
+  font: 8px Verdana,"Times New Roman";
+  font-weight: bold;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  
+}
+.strng{
+	text-align: center;
+}
+div.tooltip {	
+    position: absolute;			
+    //text-align: center;			
+    width: 250px;					
+    height: 40px;					
+    padding: 3px;				
+    font: 10px sans-serif;		
+    background: white;	
+    color: #9d0000;
+    border: 1px black groove;		
+    border-radius: 6px;	
+    font: "Lucida Console", Verdana;		
+    pointer-events: none;	
+    text-transform: uppercase;		
+    
+}
+#btnSearch{
+	opacity: 0;
+}
+
+.wrapper{
+	width:100%;
+	height:100%;
+	background-color:white;
+}
+.header{
+	width:100%;
+	height:20%;
+	background-color:white;
+}
+.menu{
+	width:100%;
+	height:5%;
+	background-color:white;
+}
+.middle{
+	width:100%;
+	height:65%;
+	background-color:white;
+}
+.footer{
+	width:100%;
+	height:10%;
+	background-color:white;
+}
+.content{
+	width:70%;
+	height:100%;
+	background-color:white;
+	float:left;
+}
+.right{
+	width:30%;
+	height:100%;
+	background-color:white;
+	float:left;
+}
+.right1{
+	width:100%;
+	height:50%;
+	background-color:white;
+}
+.right2{
+	width:100%;
+	height:50%;
+	background-color:white;
+}
+ul{
+	list-style-type:none;
+	margin-top:0px;
+}
+li{
+	display:inline;
+	border:0px solid red;
+	padding:0px 90px 0px 90px;
+	margin-left:-4px;
+}
+a{
+	text-decoration:none;
+	color:green;
+	font-variant:small-caps;
+}
+#div1{
+	font-family: "Lucida Console";
+	margin: 15px;
+	text-transform: uppercase;
+	position: absolute;
+	
+	width: 1320px;
+}
+.navigationButtons{
+	background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 8px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    
+}
+#contain{
+	margin: 20px;
+	margin-top: 2px;
+	width: 1000px;
+	height: 890px;
+	//background-color: blue;
+	float: left;
+}
+#containButtons{
+	padding-top: 10px;
+	margin-top: 10px;
+	margin: 20px;
+}
+#outerDiv{
+	//margin: 12px;
+	margin-top: 20px;
+	background-color: black;
+	height: 1000px;
+}
+h2{
+	display: inline;
+}
+#buttonDiv{
+	float: right;
+}
+
+#info{
+	float: left;
+	height: 890px;
+	width: 300px;
+	margin: 2px;
+	margin-top: 2px;
+	color: white;
+	overflow: scroll;
+	
+}
+.toCapitalize{
+	text-transform: uppercase;
+}
