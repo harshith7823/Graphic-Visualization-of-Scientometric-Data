@@ -1,3 +1,4 @@
 beautifulsoup4==4.5.1
 bs4==0.0.1
 Django==1.9.2
+gunicorn==17.5
